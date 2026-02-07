@@ -12,8 +12,6 @@ Monolithic applications work until they don't. Scaling becomes painful, deployme
 
 ## What I Built
 
-A parking management system backend decomposed into independent services:
-
 **Customer Service** handles user registration and management. Before accepting a new customer, it consults the Fraud Service to verify legitimacy.
 
 **Fraud Service** maintains a registry of fraudulent actors and provides verification endpoints for other services.
@@ -146,4 +144,4 @@ This project is preparation for Kubernetes deployment. The current Eureka-based 
 
 Building this from scratch taught me more than any tutorial could. Understanding why services need discovery, experiencing firsthand what happens when you hardcode URLs, debugging Feign clients that silently fail. These are lessons that stick.
 
-The code is not perfect. Some error handling is basic, some validations could be stricter. But it works, it scales, and most importantly, I understand every line of it.
+The code is not perfect. Some error handling is basic, some validations could be stricter. But it works, it scales.
