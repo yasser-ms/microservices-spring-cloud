@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 @Service
-public record CustomerService(CustomerRepository customerRepository, FraudClient fraudClient) {
+public record CustomerService(CustomerRepository customerRepository, FraudClient fraudClient, NotificationClient notificationClient) {
 
     public void registerCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
         Customer customer = Customer.builder().firstName(customerRegistrationRequest.firstName())
@@ -14,6 +14,7 @@ public record CustomerService(CustomerRepository customerRepository, FraudClient
         customerRepository.save(customer); // Save customers in our DB
 
         FraudCheckResponse response = fraudClient.checkFraud(customer.getId());
+        NotificationMessage res = notificationClient.sendNotifs(customer.getId());
 
         // 3. Check result
         if (response.isFraudster()) {

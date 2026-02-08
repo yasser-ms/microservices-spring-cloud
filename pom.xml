@@ -8,6 +8,7 @@
     <module>customer</module>
     <module>fraud</module>
     <module>eurekaa-server</module>
+    <module>notification</module>
     <!--AJOUTE D'AUTRE MODULE AU FIL DE TEMPS, QUAND TU VEUX D'AUTRE MICROSERVICE-->
   </modules>
   <version>1.0-SNAPSHOT</version>
@@ -19,6 +20,7 @@
     <java.version>17</java.version>
     <spring.boot.version>3.2.0</spring.boot.version>
     <spring.cloud.version>2023.0.0</spring.cloud.version>
+    <brave.version>6.0.3</brave.version>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,6 +41,26 @@
         <version>${spring.cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-bom</artifactId>
+        <version>1.16.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.zipkin.brave</groupId>
+        <artifactId>brave-bom</artifactId>
+        <version>${brave.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+    </dependency>
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-micrometer</artifactId>
+        <version>13.7</version>
+        <scope>compile</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
