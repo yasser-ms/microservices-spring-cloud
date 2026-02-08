@@ -1,6 +1,6 @@
-# Spring Cloud Microservices Starter
+# Spring Cloud Microservices 
 
-A hands-on exploration of microservices architecture built from scratch. This project started as a learning journey into distributed systems and evolved into a fully functional service ecosystem with inter-service communication, service discovery, and load balancing.
+A hands-on exploration of microservices architecture built from scratch. This project started as a learning journey into distributed systems and evolved into a fully functional service ecosystem with inter-service communication, service discovery, load balancing, and distributed tracing.
 
 ---
 
@@ -12,11 +12,15 @@ Monolithic applications work until they don't. Scaling becomes painful, deployme
 
 ## What I Built
 
-**Customer Service** handles user registration and management. Before accepting a new customer, it consults the Fraud Service to verify legitimacy.
+**Customer Service** handles user registration and management. Before accepting a new customer, it consults the Fraud Service to verify legitimacy, then triggers a notification.
 
 **Fraud Service** maintains a registry of fraudulent actors and provides verification endpoints for other services.
 
+**Notification Service** sends welcome messages to newly registered customers after fraud verification passes.
+
 **Eureka Server** acts as the central nervous system. Services register themselves on startup, and consumers discover providers by name rather than hardcoded addresses.
+
+**Distributed Tracing** with Micrometer and Zipkin allows tracking a single request as it flows through all services.
 
 ---
 
@@ -25,20 +29,29 @@ Monolithic applications work until they don't. Scaling becomes painful, deployme
 ```
                          [Eureka Server :8761]
                                   |
-                    +-------------+-------------+
-                    |                           |
-             [Customer :8080]            [Fraud :8081]
-                    |                           |
-                    +------ OpenFeign ----------+
-                    |
-             [PostgreSQL :5432]
+          +-----------------------+-----------------------+
+          |                       |                       |
+   [Customer :8080]        [Fraud :8081]        [Notification :8082]
+          |                       |                       |
+          +----- OpenFeign -------+----- OpenFeign -------+
+          |
+   [PostgreSQL :5432]
+          
+                         [Zipkin :9411]
+                              |
+          +-------------------+-------------------+
+          |                   |                   |
+      customer             fraud            notification
+      (traces)            (traces)            (traces)
 ```
 
 When a customer registers:
 1. Customer Service receives the request
 2. Customer Service asks Fraud Service (via Feign): "Is this person a fraudster?"
 3. Fraud Service checks its database and responds
-4. Customer Service proceeds or rejects based on the response
+4. If not a fraudster, Customer Service calls Notification Service
+5. Notification Service sends a welcome message
+6. All steps are traced with the same Trace ID in Zipkin
 
 No hardcoded URLs. If Fraud Service moves to a different port or if we spin up 10 instances, the system adapts automatically.
 
@@ -54,6 +67,12 @@ In production, services scale up and down. IP addresses change. Eureka provides 
 
 **Why separate databases?**
 Each service owns its data. Customer Service cannot directly query Fraud tables. This enforces boundaries and allows independent scaling and deployment.
+
+**Why Micrometer Tracing over Sleuth?**
+Spring Cloud Sleuth is deprecated in Spring Boot 3.x. Micrometer Tracing is the modern replacement, providing the same functionality with better integration.
+
+**Why Zipkin?**
+When a request fails across multiple services, finding the root cause is painful. Zipkin visualizes the entire request flow, showing exactly where time is spent and where failures occur.
 
 **Note on current setup:** For local development, services share a single PostgreSQL instance with separate databases. In production, each service would have its own database server.
 
@@ -78,6 +97,12 @@ Each service owns its data. Customer Service cannot directly query Fraud tables.
 |--------|----------|-------------|
 | GET | /api/v1/fraud/{customerId} | Check if customer is fraudster |
 
+### Notification Service (port 8082)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/v1/notification/{customerId} | Send notification to customer |
+
 ---
 
 ## Running Locally
@@ -101,11 +126,15 @@ cd eureka-server && mvn spring-boot:run
 cd fraud && mvn spring-boot:run
 
 # Terminal 3
+cd notification && mvn spring-boot:run
+
+# Terminal 4
 cd customer && mvn spring-boot:run
 ```
 
 **Verify:**
 - Eureka Dashboard: http://localhost:8761
+- Zipkin Dashboard: http://localhost:9411
 - Create customer: POST http://localhost:8080/api/v1/customers
 
 ---
@@ -116,8 +145,9 @@ cd customer && mvn spring-boot:run
 spring-cloud-microservices-starter/
 ├── customer/                 # Customer management service
 ├── fraud/                    # Fraud detection service
+├── notification/             # Notification service
 ├── eureka-server/            # Service registry
-├── docker-compose.yml        # PostgreSQL + pgAdmin
+├── docker-compose.yml        # PostgreSQL, pgAdmin, Zipkin
 └── pom.xml                   # Parent POM with shared config
 ```
 
@@ -128,9 +158,25 @@ spring-cloud-microservices-starter/
 - Java 17
 - Spring Boot 3.2
 - Spring Cloud (OpenFeign, Eureka)
+- Micrometer Tracing with Brave
+- Zipkin
 - PostgreSQL
 - Docker
 - Maven (multi-module)
+
+---
+
+## Distributed Tracing
+
+Every request gets a unique Trace ID that follows it through all services:
+
+```
+Customer logs: INFO [customer,abc123,def456] Processing request
+Fraud logs:    INFO [fraud,abc123,ghi789] Checking customer
+Notification:  INFO [notification,abc123,jkl012] Sending message
+```
+
+Same Trace ID (abc123) = same request. Zipkin aggregates these into a visual timeline showing the complete request flow.
 
 ---
 
@@ -138,10 +184,15 @@ spring-cloud-microservices-starter/
 
 This project is preparation for Kubernetes deployment. The current Eureka-based discovery will be replaced by Kubernetes native service discovery, and the entire stack will run in containers orchestrated by K8s.
 
+Upcoming additions:
+- RabbitMQ for async messaging
+- API Gateway
+- Kubernetes deployment
+
 ---
 
 ## Lessons Learned
 
-Building this from scratch taught me more than any tutorial could. Understanding why services need discovery, experiencing firsthand what happens when you hardcode URLs, debugging Feign clients that silently fail. These are lessons that stick.
+Building this from scratch taught me more than any tutorial could. Understanding why services need discovery, experiencing firsthand what happens when you hardcode URLs, debugging Feign clients that silently fail, figuring out why trace IDs weren't propagating between services. These are lessons that stick.
 
-The code is not perfect. Some error handling is basic, some validations could be stricter. But it works, it scales.
+The code is not perfect. Some error handling is basic, some validations could be stricter. But it works, it scales, and most importantly, I understand every line of it.
