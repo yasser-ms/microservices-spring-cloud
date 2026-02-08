@@ -195,4 +195,4 @@ Upcoming additions:
 
 Building this from scratch taught me more than any tutorial could. Understanding why services need discovery, experiencing firsthand what happens when you hardcode URLs, debugging Feign clients that silently fail, figuring out why trace IDs weren't propagating between services. These are lessons that stick.
 
-The code is not perfect. Some error handling is basic, some validations could be stricter. But it works, it scales, and most importantly, I understand every line of it.
+The code is not perfect. Some error handling is basic, some validations could be stricter. But it works,and it scales.
