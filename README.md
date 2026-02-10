@@ -2,6 +2,9 @@
 
 A hands-on exploration of microservices architecture built from scratch. This project started as a learning journey into distributed systems and evolved into a fully functional service ecosystem with inter-service communication, service discovery, load balancing, and distributed tracing.
 
+This what i will be building : 
+<img width="1495" height="882" alt="Screenshot From 2026-02-04 21-22-22" src="https://github.com/user-attachments/assets/32506131-ef23-49f6-a324-60ad31e0d654" />
+
 ---
 
 ## The Problem
