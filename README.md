@@ -32,6 +32,7 @@ Monolithic applications work until they don't. Scaling becomes painful, deployme
 ```
                          [Eureka Server :8761]
                                   |
+                          [APIGateway :8083] 
           +-----------------------+-----------------------+
           |                       |                       |
    [Customer :8080]        [Fraud :8081]        [Notification :8082]
@@ -42,10 +43,10 @@ Monolithic applications work until they don't. Scaling becomes painful, deployme
           
                          [Zipkin :9411]
                               |
-          +-------------------+-------------------+
-          |                   |                   |
-      customer             fraud            notification
-      (traces)            (traces)            (traces)
+          +-------------------+-------------------+------------------+
+          |                   |                   |                  |
+      customer             fraud            notification         API Gateway
+      (traces)            (traces)            (traces)            (tarces)     
 ```
 
 When a customer registers:
@@ -181,6 +182,39 @@ Notification:  INFO [notification,abc123,jkl012] Sending message
 
 Same Trace ID (abc123) = same request. Zipkin aggregates these into a visual timeline showing the complete request flow.
 
+## API Gateway : 
+
+Every request should by an API Gateway ( load balancer ), to get him to the right route he needed
+
+Note : In production, there are ressources that handles lead balacing very well, to actually focus on the project him self ( Services ) and not trying to configure load balancer from scratch 
+some ressources : 
+  google cloud load balancer : https://cloud.google.com/load-balancing
+  AWS Elastic Load Balancing : https://aws.amazon.com/fr/elasticloadbalancing/
+  Nginx load balancing : https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/
+  
+```
+spring:
+  application:
+    name: apiGW
+  zipkin:
+    base-url : http://localhost:9411
+  cloud:
+    gateway:
+      routes:
+        - id:customer
+        - uri : lb://CUSTOMER
+          predicates:
+            - Path = /api/v1/customer/*
+        - id:fraud
+        - uri: lb://FRAUD
+          predicates:
+            - Path = /api/v1/fraud/*
+        - id:notification
+        - uri: lb://NOTIFICATION
+          predicates:
+            - Path = /api/v1/notification/*
+```
+
 ---
 
 ## What's Next
@@ -189,9 +223,7 @@ This project is preparation for Kubernetes deployment. The current Eureka-based 
 
 Upcoming additions:
 - RabbitMQ for async messaging
-- API Gateway
 - Kubernetes deployment
-
 ---
 
 ## Lessons Learned
