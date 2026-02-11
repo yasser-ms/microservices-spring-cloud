@@ -151,6 +151,7 @@ spring-cloud-microservices-starter/
 ├── fraud/                    # Fraud detection service
 ├── notification/             # Notification service
 ├── eureka-server/            # Service registry
+├── ApiGW/                    # Load Balancer
 ├── docker-compose.yml        # PostgreSQL, pgAdmin, Zipkin
 └── pom.xml                   # Parent POM with shared config
 ```
