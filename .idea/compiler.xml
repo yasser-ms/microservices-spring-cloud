@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="notification" />
+        <module name="apiGW" />
         <module name="eurekaa-server" />
         <module name="fraud" />
         <module name="customer" />
