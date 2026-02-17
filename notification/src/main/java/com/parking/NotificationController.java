@@ -14,7 +14,6 @@ public record NotificationController(NotificationService notificationService) {
 
     @GetMapping(path = "{customerId}")
     public NotificationMessage sendNotifs(@PathVariable("customerId") Integer customerId){
-        String sendNotifs = notificationService.sendNotifsToCustomer(customerId);
-        return new NotificationMessage(sendNotifs);
+        return notificationService.sendNotifsToCustomer(customerId);
     }
 }

@@ -4,6 +4,7 @@ com/parking/CustomerApplication.class
 com/parking/Customer.class
 com/parking/CustomerController.class
 com/parking/NotificationMessage.class
+com/parking/CustomerConfig.class
 com/parking/NotificationClient.class
 com/parking/CustomerRegistrationRequest.class
 com/parking/FraudCheckResponse.class

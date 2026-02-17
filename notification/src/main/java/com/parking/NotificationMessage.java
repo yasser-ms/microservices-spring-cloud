@@ -1,4 +1,4 @@
 package com.parking;
 
-public record NotificationMessage(String message) {
+public record NotificationMessage(Integer customerId, String message) {
 }

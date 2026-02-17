@@ -10,7 +10,8 @@
     <module>eurekaa-server</module>
     <module>notification</module>
     <module>apiGW</module>
-    <!--AJOUTE D'AUTRE MODULE AU FIL DE TEMPS, QUAND TU VEUX D'AUTRE MICROSERVICE-->
+      <module>amqp</module>
+      <!--AJOUTE D'AUTRE MODULE AU FIL DE TEMPS, QUAND TU VEUX D'AUTRE MICROSERVICE-->
   </modules>
   <version>1.0-SNAPSHOT</version>
   <name>parking-service</name>
@@ -103,6 +104,15 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring.boot.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>
+                repackage
+              </goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <excludes>
             <exclude>

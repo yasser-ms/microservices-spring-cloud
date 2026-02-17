@@ -4,7 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 @Service
-public record CustomerService(CustomerRepository customerRepository, FraudClient fraudClient, NotificationClient notificationClient) {
+public record CustomerService(CustomerRepository customerRepository, FraudClient fraudClient, NotificationClient notificationClient, RabbitMQMessageProducer rabbitMQMessageProducer) {
+
 
     public void registerCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
         Customer customer = Customer.builder().firstName(customerRegistrationRequest.firstName())
@@ -14,8 +15,13 @@ public record CustomerService(CustomerRepository customerRepository, FraudClient
         customerRepository.save(customer); // Save customers in our DB
 
         FraudCheckResponse response = fraudClient.checkFraud(customer.getId());
-        NotificationMessage res = notificationClient.sendNotifs(customer.getId());
-
+        //NotificationMessage res = notificationClient.sendNotifs(customer.getId());
+        // Added in the Message queue
+        rabbitMQMessageProducer.publish(
+                customer.getId(),
+                "internal-exchange",
+                "internal.notification.routing-key"
+        );
         // 3. Check result
         if (response.isFraudster()) {
             throw new IllegalStateException("Customer est fraudster");

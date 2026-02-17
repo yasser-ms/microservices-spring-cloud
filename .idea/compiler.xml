@@ -11,6 +11,7 @@
         <module name="apiGW" />
         <module name="eurekaa-server" />
         <module name="fraud" />
+        <module name="amqp" />
         <module name="customer" />
       </profile>
     </annotationProcessing>
