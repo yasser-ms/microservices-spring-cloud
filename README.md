@@ -218,12 +218,70 @@ spring:
 
 ---
 
+## RabbitMQ — Async Messaging
+
+Before RabbitMQ, the Customer Service called the Notification Service directly via Feign (synchronous). This means if Notification Service is down, the entire customer registration fails. RabbitMQ decouples them completely.
+
+### How it works
+
+```
+[Customer Service] --> publishes message --> [internal-exchange] 
+                                                    |
+                                          [internal.notification.routing-key]
+                                                    |
+                                          [notification queue]
+                                                    |
+                                          [Notification Service] --> consumes --> sends email
+```
+
+1. Customer registers → fraud check passes
+2. Customer Service **publishes** the `customerId` to `internal-exchange` with routing key `internal.notification.routing-key`
+3. RabbitMQ routes it to the `notification` queue
+4. Notification Service **consumes** the message independently and sends a welcome email
+5. Customer Service doesn't wait — it's fire and forget
+
+### What I built
+
+**Shared `amqp` module** — a library used by both `customer` and `notification` containing:
+- `RabbitMQConfig` — configures the Jackson message converter so messages are serialized as JSON
+- `RabbitMQMessageProducer` — a reusable `publish()` method any service can inject
+
+**`CustomerConfig`** — declares the exchange, queue, and binding with values from `application.yml`:
+```yaml
+rabbitmq:
+  exchanges:
+    internal: internal-exchange
+  queues:
+    notification: notification
+  routing-keys:
+    internal-notification: internal.notification.routing-key
+```
+
+**`NotificationListener`** — listens on the queue and triggers the notification logic:
+```java
+@RabbitListener(queues = "${rabbitmq.queues.notification}")
+public void consumer(Integer customerId) {
+    log.info("Consumed {} from queue", customerId);
+    notificationService.sendNotifsToCustomer(customerId);
+}
+```
+
+### Why this matters
+
+| Before (Feign) | After (RabbitMQ) |
+|---|---|
+| Notification down → registration fails | Notification down → message waits in queue |
+| Synchronous, customer waits | Asynchronous, customer gets response immediately |
+| Tight coupling between services | Services are fully independent |
+
+---
+
 ## What's Next
 
 This project is preparation for Kubernetes deployment. The current Eureka-based discovery will be replaced by Kubernetes native service discovery, and the entire stack will run in containers orchestrated by K8s.
 
 Upcoming additions:
-- RabbitMQ for async messaging
+- Docker setup
 - Kubernetes deployment
 ---
 
