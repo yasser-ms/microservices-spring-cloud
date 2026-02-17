@@ -224,15 +224,12 @@ Before RabbitMQ, the Customer Service called the Notification Service directly v
 
 ### How it works
 
-```
-[Customer Service] --> publishes message --> [internal-exchange] 
-                                                    |
-                                          [internal.notification.routing-key]
-                                                    |
-                                          [notification queue]
-                                                    |
-                                          [Notification Service] --> consumes --> sends email
-```
+<img width="1327" height="720" alt="Screenshot From 2026-02-14 13-55-40" src="https://github.com/user-attachments/assets/b7247fbe-4cf2-401d-bd43-a3fcb906167e" />
+
+## In the Project : 
+
+<img width="2140" height="1207" alt="Screenshot From 2026-02-14 13-57-59" src="https://github.com/user-attachments/assets/76f0aa7b-6985-49e6-84be-ebc7f04e77bf" />
+
 
 1. Customer registers → fraud check passes
 2. Customer Service **publishes** the `customerId` to `internal-exchange` with routing key `internal.notification.routing-key`
