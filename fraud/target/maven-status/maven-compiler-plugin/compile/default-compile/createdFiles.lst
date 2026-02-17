@@ -1,7 +1,0 @@
-com/parking/FraudCheckService.class
-com/parking/FraudCheckHistory.class
-com/parking/FraudCheckResponse.class
-com/parking/FraudApplication.class
-com/parking/FraudCheckHistoryRepository.class
-com/parking/FraudCheckController.class
-com/parking/FraudCheckHistory$FraudCheckHistoryBuilder.class
